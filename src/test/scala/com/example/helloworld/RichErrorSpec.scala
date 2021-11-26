@@ -3,14 +3,10 @@ package com.example.helloworld
 
 import akka.actor.testkit.typed.scaladsl.ActorTestKit
 import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.Behaviors
-import akka.grpc.GrpcClientSettings
+import com.example.helloworld.HelloErrorReply.messageCompanion
 import com.google.protobuf.any.Any.fromJavaProto
-import com.google.rpc.Status
-import com.typesafe.config.ConfigFactory
-import io.grpc
+import io.grpc.StatusRuntimeException
 import io.grpc.protobuf.StatusProto
-import io.grpc.{StatusException, StatusRuntimeException}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -40,19 +36,18 @@ class RichErrorSpec extends AnyWordSpec
 
       val reply = service.sayHello(HelloRequest("Bob"))
       val finalReply = reply.failed.futureValue
+
       finalReply shouldBe an[StatusRuntimeException]
       //finalReply shouldBe an[StatusException]
       val casted: StatusRuntimeException = finalReply.asInstanceOf[StatusRuntimeException]
 
-      val fa: com.google.rpc.Status = StatusProto.fromStatusAndTrailers(casted.getStatus, casted.getTrailers)
+      val status: com.google.rpc.Status = StatusProto.fromStatusAndTrailers(casted.getStatus, casted.getTrailers)
 
-
-      import HelloErrorReply.messageCompanion
-      val customErrorReply = fromJavaProto(fa.getDetails(0)).unpack
+      val customErrorReply = fromJavaProto(status.getDetails(0)).unpack
       customErrorReply shouldBe an[HelloErrorReply]
 
-      fa.getCode should be(3)
-      fa.getMessage should be("What is wrong?")
+      status.getCode should be(3)
+      status.getMessage should be("What is wrong?")
       customErrorReply.errorMessage should be("The password!")
 
 
