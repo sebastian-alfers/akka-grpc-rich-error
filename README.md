@@ -15,3 +15,5 @@ Look at `ThirdRichErrorSpec`.
 - Cast the failed future exception back into a `StatusRuntimeException` [here](https://github.com/sebastian-alfers/akka-grpc-rich-error/blob/master/src/test/scala/com/example/helloworld/ThirdRichErrorSpec.scala#L74-L78)
 - Retrieve the "Rich Error" form the Trailers [here](https://github.com/sebastian-alfers/akka-grpc-rich-error/blob/master/src/test/scala/com/example/helloworld/ThirdRichErrorSpec.scala#L80)
 - Retrieve the `HelloErrorReply` stored in `details` [here](https://github.com/sebastian-alfers/akka-grpc-rich-error/blob/master/src/test/scala/com/example/helloworld/ThirdRichErrorSpec.scala#L82-L84)
+
+The `StatusProto.toStatusRuntimeException` and `StatusProto.fromStatusAndTrailers` probably need to be copy-pasted into akka-grpc. 
