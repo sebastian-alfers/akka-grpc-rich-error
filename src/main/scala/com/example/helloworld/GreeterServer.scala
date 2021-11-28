@@ -10,7 +10,7 @@ import java.security.cert.CertificateFactory
 
 import scala.io.Source
 
-import akka.actor.typed.ActorSystem
+import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.ConnectionContext
 import akka.http.scaladsl.Http
@@ -38,16 +38,16 @@ object GreeterServer {
     // important to enable HTTP/2 in ActorSystem's config
     val conf = ConfigFactory.parseString("akka.http.server.preview.enable-http2 = on")
       .withFallback(ConfigFactory.defaultApplication())
-    val system = ActorSystem[Nothing](Behaviors.empty, "GreeterServer", conf)
+    val system = ActorSystem("GreeterServer", conf)
     new GreeterServer(system).run()
   }
 }
 
-class GreeterServer(system: ActorSystem[_]) {
+class GreeterServer(system: ActorSystem) {
 
   def run(): Future[Http.ServerBinding] = {
     implicit val sys = system
-    implicit val ec: ExecutionContext = system.executionContext
+    implicit val ec: ExecutionContext = system.dispatcher
 
     val service: HttpRequest => Future[HttpResponse] =
       GreeterServiceHandler(new GreeterServiceImpl(system))

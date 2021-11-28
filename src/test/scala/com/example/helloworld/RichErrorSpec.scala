@@ -25,7 +25,7 @@ class RichErrorSpec extends AnyWordSpec
 
   implicit val system: ActorSystem[_] = testKit.system
 
-  val service = new GreeterServiceImpl(system)
+  val service = new GreeterServiceImpl(system.classicSystem)
 
   override def afterAll(): Unit = {
     testKit.shutdownTestKit()
@@ -38,7 +38,7 @@ class RichErrorSpec extends AnyWordSpec
       val finalReply = reply.failed.futureValue
 
       finalReply shouldBe an[StatusRuntimeException]
-      //finalReply shouldBe an[StatusException]
+
       val casted: StatusRuntimeException = finalReply.asInstanceOf[StatusRuntimeException]
 
       val status: com.google.rpc.Status = StatusProto.fromStatusAndTrailers(casted.getStatus, casted.getTrailers)

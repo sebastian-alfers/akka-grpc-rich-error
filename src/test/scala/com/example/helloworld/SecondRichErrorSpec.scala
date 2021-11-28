@@ -11,6 +11,7 @@ import akka.http.scaladsl.model.HttpResponse
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
 import com.example.helloworld.GreeterService.Serializers.HelloRequestSerializer
+
 import com.google.protobuf.any.Any
 import com.google.rpc.{Code, Status}
 import io.grpc.StatusRuntimeException
@@ -22,7 +23,7 @@ import org.scalatest.wordspec.{AnyWordSpec, AnyWordSpecLike}
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class SecondRichErrorSpec extends AnyWordSpec
   with BeforeAndAfterAll
@@ -30,29 +31,17 @@ class SecondRichErrorSpec extends AnyWordSpec
   with ScalaFutures {
 
   val testKit = ActorTestKit()
-
-  def toJavaProto(scalaPbSource: com.google.protobuf.any.Any): com.google.protobuf.Any = {
-    val javaPbOut = com.google.protobuf.Any.newBuilder
-    javaPbOut.setTypeUrl(scalaPbSource.typeUrl)
-    javaPbOut.setValue(scalaPbSource.value)
-    javaPbOut.build
-  }
-
-  def fromJavaProto(javaPbSource: com.google.protobuf.Any): com.google.protobuf.any.Any =
-    com.google.protobuf.any.Any(typeUrl = javaPbSource.getTypeUrl, value = javaPbSource.getValue)
-
-
   implicit val system = testKit.system
+
 
   "The default ExceptionHandler" should {
 
     "return rich error" in {
 
-
       implicit val serializer = HelloRequestSerializer
       implicit val writer = GrpcProtocolNative.newWriter(Identity)
 
-      val service = new GreeterServiceImpl(system)
+      val service = new GreeterServiceImpl(system.classicSystem)
 
       def customHandler(system: ActorSystem): PartialFunction[Throwable, Trailers] ={
         case grpcException: StatusRuntimeException =>
@@ -75,6 +64,7 @@ class SecondRichErrorSpec extends AnyWordSpec
       status.getCode should be(Code.INVALID_ARGUMENT.getNumber)
       status.getMessage should be("What is wrong?")
 
+      import com.google.protobuf.any.Any.fromJavaProto
       import HelloErrorReply.messageCompanion
       val customErrorReply = fromJavaProto(status.getDetails(0)).unpack
       customErrorReply.errorMessage should be("The password!")
