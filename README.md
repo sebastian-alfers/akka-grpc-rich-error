@@ -1,10 +1,16 @@
 # Try akka-grpc with google Rich Error model
 
-The proto comes from:
+> :warning: WIP
+
+Added dependency:
 
 ```
 "io.grpc" % "grpc-protobuf" % "1.42.1"
 ```
+
+# First example
+
+Call the service directly.
 
 ## Server
 
@@ -24,6 +30,15 @@ The proto comes from:
 
 Full service example can be found [here](https://github.com/sebastian-alfers/akka-grpc-rich-error/blob/master/src/main/scala/com/example/helloworld/GreeterServiceImpl.scala).
 Full client example (spec) can be found [here](https://github.com/sebastian-alfers/akka-grpc-rich-error/blob/master/src/test/scala/com/example/helloworld/RichErrorSpec.scala).
+
+# Second example
+
+The service part is 
+
+- Route the request through the `GreeterServiceHandler`
+- Added a custom [case to the error handler](https://github.com/sebastian-alfers/akka-grpc-rich-error/blob/master/src/test/scala/com/example/helloworld/SecondRichErrorSpec.scala#L57-L60)
+- Access the "Rich Error Model" directly through the `Metadata` [here](https://github.com/sebastian-alfers/akka-grpc-rich-error/blob/master/src/test/scala/com/example/helloworld/SecondRichErrorSpec.scala#L70)
+- Import the message companion of the expected item stored in the details section [here](https://github.com/sebastian-alfers/akka-grpc-rich-error/blob/master/src/test/scala/com/example/helloworld/SecondRichErrorSpec.scala#L78-L79)
 
 ## More resources:
 Links:
