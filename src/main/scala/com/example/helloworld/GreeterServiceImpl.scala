@@ -29,7 +29,7 @@ class GreeterServiceImpl(system: ActorSystem[_]) extends GreeterService {
 
   override def sayHello(request: HelloRequest): Future[HelloReply] = {
     if(request.name == "Bob") {
-
+      println("this is bob")
       // https://cloud.google.com/apis/design/errors#error_model
       val status: Status = Status.newBuilder()
         .setCode(Code.INVALID_ARGUMENT.getNumber)
